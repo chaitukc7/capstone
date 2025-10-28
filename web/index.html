@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chat Capstone Starter</title>
+    <style>
+      body { font-family: ui-sans-serif, system-ui, -apple-system; margin: 0; padding: 24px; }
+      #log { border: 1px solid #ddd; height: 300px; overflow: auto; padding: 8px; margin-top: 12px; }
+      .row { display: flex; gap: 8px; }
+      input, button { padding: 8px; }
+      button { cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <h1>Chat Capstone Starter</h1>
+    <div class="row">
+      <input id="name" placeholder="name" />
+      <input id="text" placeholder="type a message" style="flex:1" />
+      <button id="send">Send</button>
+    </div>
+    <div id="log"></div>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+      const log = (msg) => {
+        const el = document.getElementById('log')
+        const p = document.createElement('div')
+        p.textContent = msg
+        el.appendChild(p)
+        el.scrollTop = el.scrollHeight
+      }
+      const socket = io()
+      socket.on('connect', () => log('connected ' + socket.id))
+      socket.on('chat:recv', (m) => {
+        const when = new Date(m.ts).toLocaleTimeString()
+        log(`[${when}] ${m.user}: ${m.text}`)
+      })
+      document.getElementById('send').onclick = () => {
+        const user = document.getElementById('name').value || 'anonymous'
+        const text = document.getElementById('text').value || ''
+        socket.emit('chat:send', { user, text })
+        document.getElementById('text').value = ''
+      }
+    </script>
+  </body>
+</html>
